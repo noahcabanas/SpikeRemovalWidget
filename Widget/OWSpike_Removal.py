@@ -48,7 +48,7 @@ class Spike_Removal(OWWidget):
             minv=1,
             maxv=1000,
             step=1,
-            label="Height for peak difference:",
+            label="Minium for peak difference to classify a spectra as having spikes:",
             callback=[self.Hi_Changed, self.checkCommit],
         )
         gui.spin(
@@ -109,6 +109,7 @@ class Spike_Removal(OWWidget):
                 Distance = np.diff(row, n=0)
                 if np.any(Distance > self.Hi):
                     out.append(fixer(row,m=self.dis))
+                 #Looks for spectra which contain a specific height differenc between two points as seen in cosimic ray spikes.
                 else:
                     out.append(row)
             return out
