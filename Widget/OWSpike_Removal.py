@@ -38,7 +38,7 @@ class Spike_Removal(OWWidget):
             minv=1,
             maxv=20,
             step=1,
-            label="Threshold value for peak cutoff:",
+            label="Threshold value for Z-Score, Used to determine what is a spike:",
             callback=[self.threshold_Changed, self.checkCommit],
         )
         gui.spin(
@@ -58,7 +58,7 @@ class Spike_Removal(OWWidget):
             minv=1,
             maxv=20,
             step=1,
-            label="Distance between Peaks:",
+            label="Number of nearby normal peaks to average:",
             callback=[self.dis_Changed, self.checkCommit],
         )
         gui.checkBox(
