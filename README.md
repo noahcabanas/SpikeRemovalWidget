@@ -1,2 +1,2 @@
 # SpikeRemovalWidget
-Uses Zscore to determine spikes in spectra and averages spikes with normal nearby peaks
+Uses Zscore method to classify abnormal spikes in spectra and these averages spikes with normal nearby peaks
