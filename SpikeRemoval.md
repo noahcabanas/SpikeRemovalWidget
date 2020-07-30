@@ -2,7 +2,7 @@ Spike Removal
 
 **Inputs**
 
--Data: input dataset
+- Data: input dataset
 
 **Outputs**
 
