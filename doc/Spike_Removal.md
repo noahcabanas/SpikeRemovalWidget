@@ -14,6 +14,6 @@ Below is a description of the inputs for the **Spike Removal** tool
 
 ![](Despike.png)
 
-1. Threshold is used to determine a cutoff value within a spectra for determining peaks
+1. Threshold is used to determine a cutoff value for the modified z-score test that determins which areas of a spectra are spiked.
 2. The minimum peak difference is used to find spectras within a data set which display a high contrast between peaks as observed in spiked spectra.
 3. The nearby peaks setting is used to determine the range over which the peak will average non spiked data points. 
