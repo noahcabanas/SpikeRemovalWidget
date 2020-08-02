@@ -1,4 +1,4 @@
-#Spike Removal
+# Spike Removal
 
 **Inputs**
 
