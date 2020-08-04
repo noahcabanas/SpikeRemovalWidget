@@ -1,5 +1,4 @@
 from Orange.widgets.widget import OWWidget, Msg, Input, Output
-
 from Orange.widgets import gui, settings
 import Orange.data
 from AnyQt.QtWidgets import QWidget, QFormLayout
@@ -9,14 +8,10 @@ import numpy.ma as ma
 from orangecontrib.spectroscopy.widgets.gui import lineEditIntOrNone
 
 class SpikeRemovalEditor(BaseEditorOrange):
-    name = "Spike Removal"
-    description = "Finds Spikes in Ramen spectra based on Z-Score and allows for removal by averaging nearby data"
-    priority = 100
     class Inputs:
         data = Input("Data", Orange.data.Table, default=True)
     class Outputs:
         Processed = Output("Data", Orange.data.Table, default=True)
-    want_main_area = False
     settingsHandler = settings.DomainContextHandler()
     threshold = settings.Setting(7)
     Hi = settings.Setting(100)
@@ -24,65 +19,32 @@ class SpikeRemovalEditor(BaseEditorOrange):
     commitOnChange = settings.Setting(True)
     class Warning(OWWidget.Warning):
         nodata = Msg("No useful data on input!")
-    def __init__(self):
-        super().__init__()
-        super().__init__()
-        self.data = None
-        self.set_data(self.data)
+    def __init__(self, parent = None, **kwargs):
+        super().__init__(parent, **kwargs)
+        layout = QVBoxLayout()
+        self.dis=5
+        self.threshold = 7
+        self.Hi = 100
+        self.Optionform = QFormLayout()
+        minf, maxf = -sys.float_info.max, sys.float_info.max
+        self.heig = SetXDoubleSpinBox(
+            minimum=minf, maximum=maxf, singleStep=1,
+            value=self.Hi, enabled=True)
+        self.dista = SetXDoubleSpinBox(
+            minimum=minf, maximum=maxf, singleStep=1,
+            value=self.dis, enabled=True)
+        self.threshol = SetXDoubleSpinBox(
+            minimum=minf, maximum=maxf, singleStep=1,
+            value=self.threshold, enabled=True)
+        self.areaform.addRow("Threshold", self.threshol)
+        self.areaform.addRow("Value to select for spiked spectra", self.heig)
+        self.areaform.addRow("Distance between averaged normal peaks", self.dista)
+        self.preview_data = None
 
-        self.optionsBox = gui.widgetBox(self.controlArea, "Options")
-        gui.spin(
-            self.optionsBox,
-            self,
-            "threshold",
-            minv=1,
-            maxv=20,
-            step=1,
-            label="Threshold value for Z-Score, Used to determine what is a spike:",
-            callback=[self.threshold_Changed, self.checkCommit],
-        )
-        gui.spin(
-            self.optionsBox,
-            self,
-            "Hi",
-            minv=1,
-            maxv=1000,
-            step=1,
-            label="Minium for peak difference to classify a spectra as having spikes:",
-            callback=[self.Hi_Changed, self.checkCommit],
-        )
-        gui.spin(
-            self.optionsBox,
-            self,
-            "dis",
-            minv=1,
-            maxv=20,
-            step=1,
-            label="Number of nearby normal peaks to average:",
-            callback=[self.dis_Changed, self.checkCommit],
-        )
-        gui.checkBox(
-            self.optionsBox, self, "commitOnChange", "Commit data on selection change"
-        )
-        gui.button(self.optionsBox, self, "Commit", callback=self.commit)
-        self.optionsBox.setDisabled(False)
+        self.user_changed = False
 
     @Inputs.data
-    def set_data(self, dataset):
-        self.Warning.nodata.clear()
-        self.closeContext()
-        self.data = dataset
-        if dataset is None:
-            self.Warning.nodata()
-        else:
-            self.openContext(dataset.domain)
-    def threshold_Changed(self):
-        self.commit()
-    def Hi_Changed(self):
-        self.commit()
-    def dis_Changed(self):
-        self.commit()
-    def commit(self):
+    def __call__ (self, data):
         def modified_z_score(intensity):
             median1 = np.median(intensity)
             mad_int = np.median([np.abs(intensity - median1)])
@@ -102,10 +64,10 @@ class SpikeRemovalEditor(BaseEditorOrange):
                     y_out[i] = np.mean(y[w2])
             return y_out
             #Spikes are replaced by an averaged of the nearby points around them
-        def finder(U):
+        def finder(Spectral):
             out = []
-            Set = np.array(U)
-            for row in Set:
+            Series = np.array(Spectral)
+            for row in Series:
                 Distance = np.diff(row, n=0)
                 if np.any(Distance > self.Hi):
                     out.append(fixer(row,m=self.dis))
@@ -113,15 +75,11 @@ class SpikeRemovalEditor(BaseEditorOrange):
                 else:
                     out.append(row)
             return out
-            #
-        domain = self.data.domain
-        Processed_data = Orange.data.Table(domain, finder(self.data))
-        self.Outputs.Processed.send(Processed_data)
+         
+        domain = Orange.data.Domain(atts, data.domain.class_vars,
+									data.domain.metas)
+  
+        return data.from_table(domain, finder(data))
 
-    def checkCommit(self):
-            if self.commitOnChange:
-                self.commit()
-
-
-
-
+    def set_preview_data(self, data):
+            self.preview_data = data
