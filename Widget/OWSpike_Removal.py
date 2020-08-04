@@ -8,7 +8,7 @@ import numpy as np
 import numpy.ma as ma
 from orangecontrib.spectroscopy.widgets.gui import lineEditIntOrNone
 
-class Spike_Removal(OWWidget):
+class SpikeRemovalEditor(BaseEditorOrange):
     name = "Spike Removal"
     description = "Finds Spikes in Ramen spectra based on Z-Score and allows for removal by averaging nearby data"
     priority = 100
